@@ -23,7 +23,7 @@ CREATE TABLE "Account" (
 CREATE TABLE "Session" (
   "id" TEXT PRIMARY KEY,
   "sessionToken" TEXT NOT NULL UNIQUE,
-  "userId" TEXT NOT NOT NULL,
+  "userId" TEXT NOT NULL,
   "expires" TIMESTAMP(3) NOT NULL
 );
 

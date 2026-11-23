@@ -3,18 +3,48 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { BuildActions } from "@/components/build-actions";
 import { BuildComments } from "@/components/build-comments";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function BuildDetailPage({ params }: { params: { id: string } }) {
-  let build: Prisma.BuildGetPayload<{ include: { author: true; class: true } }> | null = null;
+  let build: Prisma.BuildGetPayload<{ include: { author: true; class: true; comments: { include: { author: true; replies: { include: { author: true } } } } } }> | null = null;
   try {
     build = await prisma.build.findUnique({
       where: { id: params.id },
-      include: { author: true, class: true },
+      include: {
+        author: true,
+        class: true,
+        comments: { include: { author: true, replies: { include: { author: true } } }, orderBy: { createdAt: "desc" } },
+      },
     });
   } catch {}
   if (!build) notFound();
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  if (build.visibility !== "PUBLIC") {
+    if (!userId) notFound();
+    if (build.authorId !== userId) {
+      if (build.visibility === "FRIENDS") {
+        const friend = await prisma.friendship.findFirst({
+          where: {
+            status: "ACCEPTED",
+            OR: [
+              { requesterId: userId, recipientId: build.authorId },
+              { requesterId: build.authorId, recipientId: userId },
+            ],
+          },
+        });
+        if (!friend) notFound();
+      } else if (build.visibility === "GUILD") {
+        const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+        if (!user || !["MODERATOR", "ADMIN"].includes(user.role)) notFound();
+      } else {
+        notFound();
+      }
+    }
+  }
   const attributes = build.attributes as unknown as Record<string, number>;
   const skills = build.skills as unknown as { name: string; level: number }[];
   const equipment = build.equipment as unknown as { slot: string; name: string }[];
@@ -64,7 +94,20 @@ export default async function BuildDetailPage({ params }: { params: { id: string
           <div className="mt-3 flex flex-wrap gap-2">{content.map((item) => <span key={item} className="rounded-lg bg-violet-100 px-3 py-1.5 text-sm font-bold text-violet-800 dark:bg-violet-950 dark:text-violet-300">{item}</span>)}</div>
         </div>
         <BuildActions buildId={build.id} />
-        <BuildComments buildId={build.id} />
+        <BuildComments
+          buildId={build.id}
+          initialComments={build.comments.map((comment) => ({
+            id: comment.id,
+            body: comment.body,
+            author: { name: comment.author.name, gameNick: comment.author.gameNick },
+            replies: comment.replies.map((reply) => ({
+              id: reply.id,
+              body: reply.body,
+              author: { name: reply.author.name, gameNick: reply.author.gameNick },
+              replies: [],
+            })),
+          }))}
+        />
       </aside>
     </div>
   );

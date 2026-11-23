@@ -61,6 +61,25 @@ export default async function HomePage() {
           }} />)}
         </div>
       </section>
+
+      <section className="grid gap-4 md:grid-cols-2">
+        <Link href="/friends" className="card flex items-center justify-between p-5 transition hover:border-violet-400">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-violet-700 dark:text-violet-300">Rede social</p>
+            <h2 className="mt-1 text-xl font-black">Veja as builds dos amigos</h2>
+            <p className="mt-1 text-sm text-slate-500">Solicitações, amizades, curtidas e comentários.</p>
+          </div>
+          <span className="text-3xl" aria-hidden="true">♡</span>
+        </Link>
+        <Link href="/guild" className="card flex items-center justify-between p-5 transition hover:border-amber-400">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">Guilda</p>
+            <h2 className="mt-1 text-xl font-black">Recomendações oficiais</h2>
+            <p className="mt-1 text-sm text-slate-500">Builds destacadas por moderadores e líderes.</p>
+          </div>
+          <span className="text-3xl" aria-hidden="true">◆</span>
+        </Link>
+      </section>
     </div>
   );
 }

@@ -12,7 +12,28 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const parsed = commentSchema.safeParse(await request.json());
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   const build = await prisma.build.findUnique({ where: { id: params.id } });
-  if (!build || build.visibility === "PRIVATE") return NextResponse.json({ error: "Acesso negado" }, { status: 404 });
+  if (!build) return NextResponse.json({ error: "Acesso negado" }, { status: 404 });
+  if (build.visibility === "PRIVATE" && build.authorId !== session.user.id) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 404 });
+  }
+  if (build.visibility === "FRIENDS" && build.authorId !== session.user.id) {
+    const friend = await prisma.friendship.findFirst({
+      where: {
+        status: "ACCEPTED",
+        OR: [
+          { requesterId: session.user.id, recipientId: build.authorId },
+          { requesterId: build.authorId, recipientId: session.user.id },
+        ],
+      },
+    });
+    if (!friend) return NextResponse.json({ error: "Acesso negado" }, { status: 404 });
+  }
+  if (build.visibility === "GUILD" && build.authorId !== session.user.id) {
+    const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { role: true } });
+    if (!user || !["MODERATOR", "ADMIN"].includes(user.role)) {
+      return NextResponse.json({ error: "Acesso negado" }, { status: 404 });
+    }
+  }
   const comment = await prisma.comment.create({
     data: { buildId: params.id, authorId: session.user.id, body: parsed.data.body, parentId: parsed.data.parentId },
   });

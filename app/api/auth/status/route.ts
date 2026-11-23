@@ -8,10 +8,17 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const session = await getServerSession(authOptions);
   let database: "ok" | "error" = "ok";
+  let authTables: "ok" | "error" = "ok";
   try {
     await prisma.user.count();
   } catch {
     database = "error";
+  }
+  try {
+    await prisma.account.count();
+    await prisma.session.count();
+  } catch {
+    authTables = "error";
   }
   let nextAuthUrl = null as string | null;
   try {
@@ -26,6 +33,8 @@ export async function GET() {
       nextAuthSecret: !!process.env.NEXTAUTH_SECRET,
       nextAuthUrl,
       database,
+      authTables,
+      callbackUrl: "https://rooc-buildmeapp.vercel.app/api/auth/callback/discord",
     },
     user: session?.user
       ? { name: session.user.name, id: (session.user as typeof session.user & { id?: string }).id ?? null }

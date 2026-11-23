@@ -121,7 +121,6 @@ O projeto é um runtime Next.js com APIs server-side e não usa mais exportaçã
 4. Importe o repositório na Vercel.
 5. Configure os secrets no ambiente de produção:
    - `DATABASE_URL`
-   - `DATABASE_URL_UNPOOLED` (conexão direta do Neon para Prisma migrate)
    - `NEXTAUTH_URL=https://SEU-DOMINIO`
    - `NEXTAUTH_SECRET`
    - `DISCORD_CLIENT_ID`

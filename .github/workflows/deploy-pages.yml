@@ -28,6 +28,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://rooc:rooc@localhost:5432/rooc_builds
           NEXTAUTH_SECRET: github-pages-static-build
+          GITHUB_PAGES: "true"
       - run: touch out/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

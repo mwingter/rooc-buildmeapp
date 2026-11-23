@@ -1,7 +1,7 @@
 import Link from "next/link";
-import type { DemoBuild } from "@/lib/catalog";
+import type { BuildCardData } from "@/lib/catalog";
 
-export function BuildCard({ build }: { build: DemoBuild }) {
+export function BuildCard({ build }: { build: BuildCardData }) {
   return (
     <article className="card group overflow-hidden">
       <div className="h-28 bg-gradient-to-br from-violet-100 via-amber-50 to-slate-100 p-5 dark:from-violet-950 dark:via-slate-900 dark:to-slate-800">

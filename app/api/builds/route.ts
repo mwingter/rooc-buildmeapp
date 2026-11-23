@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
         visibility: "PUBLIC",
         ...(q ? { OR: [{ name: { contains: q, mode: "insensitive" } }, { description: { contains: q, mode: "insensitive" } }] } : {}),
       },
-      include: { author: { select: { name: true, gameNick: true } }, class: true },
+      include: { author: { select: { name: true, gameNick: true } }, class: true, _count: { select: { likes: true } } },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(builds);

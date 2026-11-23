@@ -110,12 +110,25 @@ npm run db:seed
 - Implementar moderação de comentários/denúncias na interface administrativa.
 - Substituir o adaptador local por uma API oficial quando houver autorização.
 
-## GitHub Pages
+## Deploy com Vercel e PostgreSQL
 
-O workflow `.github/workflows/deploy-pages.yml` publica uma exportação estática
-da interface em GitHub Pages a partir da branch `main`.
-GitHub Pages não executa Next.js server-side, APIs, NextAuth ou PostgreSQL.
-A versão publicada ali é uma demonstração estática; login, publicação, comentários
-e administração continuam disponíveis com `npm run dev`/`npm run build` em um host
-com suporte a servidor. Para publicação completa, use GitHub Actions para build
-e hospede o runtime em Render, Railway, Fly.io ou outra plataforma compatível.
+O projeto é um runtime Next.js com APIs server-side e não usa mais exportação estática.
+
+1. Crie um banco PostgreSQL no Neon e copie a connection string para `DATABASE_URL`.
+2. Crie uma aplicação Discord em `https://discord.com/developers/applications`.
+3. Configure o redirect do Discord após criar o domínio da implantação:
+   `https://SEU-DOMINIO/api/auth/callback/discord`
+4. Importe o repositório na Vercel.
+5. Configure os secrets no ambiente de produção:
+   - `DATABASE_URL`
+   - `DIRECT_URL` (opcionalmente, para comandos Prisma no Neon)
+   - `NEXTAUTH_URL=https://SEU-DOMINIO`
+   - `NEXTAUTH_SECRET`
+   - `DISCORD_CLIENT_ID`
+   - `DISCORD_CLIENT_SECRET`
+   - `ENABLE_MOCK_AUTH=false`
+6. Execute as migrações com `npm run db:migrate`, ou configure o banco durante o provisioning.
+7. Não execute `db:seed` em produção: ele é destinado apenas a demonstração local.
+
+O provider de credenciais mockado só pode ser habilitado com
+`ENABLE_MOCK_AUTH=true` fora de `NODE_ENV=production`.

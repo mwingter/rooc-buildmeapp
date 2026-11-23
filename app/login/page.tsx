@@ -8,7 +8,7 @@ export default function LoginPage() {
         <h1 className="mt-5 text-2xl font-black">Entre na comunidade</h1>
         <p className="mt-2 text-sm text-slate-500">Use sua conta do Discord para criar e compartilhar builds.</p>
         <Link href="/api/auth/signin/discord" className="button-primary mt-6 w-full">Continuar com Discord</Link>
-        <p className="mt-4 text-xs text-slate-500">Ambiente local: use o provedor “Discord mock” na tela do Auth.js.</p>
+        {process.env.ENABLE_MOCK_AUTH === "true" && <p className="mt-4 text-xs text-slate-500">Apenas o ambiente local pode habilitar o provedor de desenvolvimento.</p>}
       </div>
     </div>
   );

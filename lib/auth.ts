@@ -15,18 +15,21 @@ export const authOptions: NextAuthOptions = {
           }),
         ]
       : []),
-    CredentialsProvider({
-      name: "Discord mock",
-      credentials: { name: { label: "Name", type: "text" } },
-      async authorize(credentials) {
-        if (process.env.NODE_ENV === "production") return null;
-        const name = credentials?.name?.trim() || "Jogador Demo";
-        return (
-          (await prisma.user.findFirst({ where: { name } })) ??
-          prisma.user.create({ data: { name, email: `${name.replace(/\\W/g, "").toLowerCase()}@mock.local` } })
-        );
-      },
-    }),
+    ...(process.env.ENABLE_MOCK_AUTH === "true" && process.env.NODE_ENV !== "production"
+      ? [
+          CredentialsProvider({
+            name: "Desenvolvimento mock",
+            credentials: { name: { label: "Name", type: "text" } },
+            async authorize(credentials) {
+              const name = credentials?.name?.trim() || "Jogador Demo";
+              return (
+                (await prisma.user.findFirst({ where: { name } })) ??
+                prisma.user.create({ data: { name, email: `${name.replace(/\\W/g, "").toLowerCase()}@mock.local` } })
+              );
+            },
+          }),
+        ]
+      : []),
   ],
   session: { strategy: "jwt" },
   callbacks: {

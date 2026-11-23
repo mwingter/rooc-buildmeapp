@@ -1,21 +1,47 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BuildCard } from "@/components/build-card";
-import { demoBuilds, classes } from "@/lib/catalog";
+import { classes } from "@/lib/catalog";
+import type { BuildCardData } from "@/lib/catalog";
 
 export default function BuildsPage() {
   const [q, setQ] = useState("");
   const [className, setClassName] = useState("");
   const [content, setContent] = useState("");
+  const [builds, setBuilds] = useState<BuildCardData[]>([]);
+  useEffect(() => {
+    fetch("/api/builds")
+      .then((response) => response.ok ? response.json() : [])
+      .then((items: Array<{ id: string; name: string; description: string; role: string; specialization: string; patchVersion: string; official: boolean; content: string[]; class: { name: string }; author: { name: string | null; gameNick: string | null }; likes?: unknown[] }>) => {
+        setBuilds(items.map((build) => ({
+          id: build.id,
+          name: build.name,
+          description: build.description,
+          role: build.role,
+          specialization: build.specialization,
+          patchVersion: build.patchVersion,
+          official: build.official,
+          content: build.content.map((value) => value === "PVE" ? "PvE" : value === "PVP" ? "PvP" : value),
+          className: build.class.name,
+          author: build.author.gameNick ?? build.author.name ?? "Jogador",
+          likes: Array.isArray(build.likes) ? build.likes.length : 0,
+          attributes: {},
+          skills: [],
+          equipment: [],
+          cards: [],
+        })));
+      })
+      .catch(() => setBuilds([]));
+  }, []);
   const filtered = useMemo(() => {
     const query = q.toLowerCase();
-    return demoBuilds.filter((build) =>
+    return builds.filter((build) =>
       (!className || build.className === className) &&
       (!content || build.content.includes(content)) &&
       (!query || `${build.name} ${build.className} ${build.specialization} ${build.author}`.toLowerCase().includes(query))
     );
-  }, [q, className, content]);
+  }, [q, className, content, builds]);
 
   return (
     <div>

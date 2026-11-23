@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { SkillTreeEditor } from "@/components/skill-tree-editor";
 
 type PresetCategory = {
   id: string;
@@ -22,7 +23,15 @@ const categories: PresetCategory[] = [
 
 type PresetState = Record<string, string>;
 
-export function PresetEditor({ onChange }: { onChange: (value: PresetState) => void }) {
+export function PresetEditor({
+  onChange,
+  skillLevels,
+  onSkillLevelsChange,
+}: {
+  onChange: (value: PresetState) => void;
+  skillLevels: Record<string, number>;
+  onSkillLevelsChange: (value: Record<string, number>) => void;
+}) {
   const [active, setActive] = useState("stats");
   const [selected, setSelected] = useState<PresetState>({});
   const [search, setSearch] = useState("");
@@ -71,6 +80,11 @@ export function PresetEditor({ onChange }: { onChange: (value: PresetState) => v
             </div>
             <input className="input sm:max-w-52" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Buscar ${category.label.toLowerCase()}`} aria-label={`Buscar em ${category.label}`} />
           </div>
+          {category.id === "skills" ? (
+            <div className="mt-4">
+              <SkillTreeEditor value={skillLevels} onChange={onSkillLevelsChange} />
+            </div>
+          ) : (
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {options.map((option) => (
               <button
@@ -84,7 +98,8 @@ export function PresetEditor({ onChange }: { onChange: (value: PresetState) => v
               </button>
             ))}
           </div>
-          {options.length === 0 && <p className="py-8 text-center text-sm text-slate-500">Nenhuma opção encontrada no catálogo.</p>}
+          )}
+          {options.length === 0 && category.id !== "skills" && <p className="py-8 text-center text-sm text-slate-500">Nenhuma opção encontrada no catálogo.</p>}
         </section>
       </div>
     </div>

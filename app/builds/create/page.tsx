@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { classes } from "@/lib/catalog";
 import { PresetEditor } from "@/components/preset-editor";
+import { SKILL_NAMES } from "@/components/skill-tree-editor";
 
 type PresetState = Record<string, string>;
 
@@ -10,6 +11,7 @@ export default function CreateBuildPage() {
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState("");
   const [preset, setPreset] = useState<PresetState>({});
+  const [skillLevels, setSkillLevels] = useState<Record<string, number>>({});
   const [form, setForm] = useState({
     name: "", description: "", className: "Lord Knight", specialization: "Spear", patchVersion: "2026.11",
     role: "MVP", visibility: "PUBLIC", content: ["PvE"], str: 50, agi: 30, vit: 40, int: 20, dex: 30, luk: 10,
@@ -25,7 +27,9 @@ export default function CreateBuildPage() {
         name: form.name, description: form.description, className: form.className, specialization: form.specialization,
         role: form.role, content: form.content, patchVersion: form.patchVersion, visibility: form.visibility,
         attributes: { str: form.str, agi: form.agi, vit: form.vit, int: form.int, dex: form.dex, luk: form.luk },
-        skills: preset.skills ? [{ name: preset.skills, level: 10 }] : [],
+        skills: Object.entries(skillLevels)
+          .filter(([, level]) => level > 0)
+          .map(([id, level]) => ({ name: SKILL_NAMES[id] ?? id, level })),
         equipment: preset.equipment ? [{ slot: "Preset", name: preset.equipment }] : [],
         cards: preset.cards ? [{ slot: "Preset", name: preset.cards }] : [],
         runes: { preset: preset.runes ?? null },
@@ -73,7 +77,7 @@ export default function CreateBuildPage() {
               <h2 className="text-xl font-black">3. Preset detalhado</h2>
               <p className="mt-1 text-sm text-slate-500">Clique em uma categoria e escolha a configuração. O catálogo real poderá ser expandido pela administração.</p>
             </div>
-            <PresetEditor onChange={setPreset} />
+            <PresetEditor onChange={setPreset} skillLevels={skillLevels} onSkillLevelsChange={setSkillLevels} />
           </section>
         )}
         {step === 4 && (

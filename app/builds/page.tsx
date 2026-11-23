@@ -1,13 +1,21 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import { BuildCard } from "@/components/build-card";
 import { demoBuilds, classes } from "@/lib/catalog";
 
-export default function BuildsPage({ searchParams }: { searchParams: { q?: string; class?: string; content?: string } }) {
-  const q = searchParams.q?.toLowerCase() ?? "";
-  const filtered = demoBuilds.filter((build) =>
-    (!searchParams.class || build.className === searchParams.class) &&
-    (!searchParams.content || build.content.includes(searchParams.content)) &&
-    (!q || `${build.name} ${build.className} ${build.specialization} ${build.author}`.toLowerCase().includes(q))
-  );
+export default function BuildsPage() {
+  const [q, setQ] = useState("");
+  const [className, setClassName] = useState("");
+  const [content, setContent] = useState("");
+  const filtered = useMemo(() => {
+    const query = q.toLowerCase();
+    return demoBuilds.filter((build) =>
+      (!className || build.className === className) &&
+      (!content || build.content.includes(content)) &&
+      (!query || `${build.name} ${build.className} ${build.specialization} ${build.author}`.toLowerCase().includes(query))
+    );
+  }, [q, className, content]);
 
   return (
     <div>
@@ -15,21 +23,21 @@ export default function BuildsPage({ searchParams }: { searchParams: { q?: strin
         <p className="text-sm font-bold text-violet-700 dark:text-violet-300">Biblioteca</p>
         <h1 className="text-3xl font-black">Explorar builds</h1>
       </div>
-      <form className="card mb-6 grid gap-3 p-4 md:grid-cols-[1fr_220px_180px_auto]" role="search">
+      <form className="card mb-6 grid gap-3 p-4 md:grid-cols-[1fr_220px_180px_auto]" role="search" onSubmit={(event) => event.preventDefault()}>
         <div>
           <label className="label" htmlFor="q">Buscar</label>
-          <input className="input" id="q" name="q" defaultValue={searchParams.q} placeholder="Nome, classe ou criador" />
+          <input className="input" id="q" name="q" value={q} onChange={(event) => setQ(event.target.value)} placeholder="Nome, classe ou criador" />
         </div>
         <div>
           <label className="label" htmlFor="class">Classe</label>
-          <select className="input" id="class" name="class" defaultValue={searchParams.class}>
+          <select className="input" id="class" name="class" value={className} onChange={(event) => setClassName(event.target.value)}>
             <option value="">Todas</option>
             {classes.map((item) => <option key={item.slug}>{item.name}</option>)}
           </select>
         </div>
         <div>
           <label className="label" htmlFor="content">Conteúdo</label>
-          <select className="input" id="content" name="content" defaultValue={searchParams.content}>
+          <select className="input" id="content" name="content" value={content} onChange={(event) => setContent(event.target.value)}>
             <option value="">Todos</option>
             {["PvE", "PvP", "MVP", "WG"].map((item) => <option key={item}>{item}</option>)}
           </select>

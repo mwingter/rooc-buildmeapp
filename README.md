@@ -109,3 +109,13 @@ npm run db:seed
 - Configurar S3/R2 para imagens com validação de tipo/tamanho.
 - Implementar moderação de comentários/denúncias na interface administrativa.
 - Substituir o adaptador local por uma API oficial quando houver autorização.
+
+## GitHub Pages
+
+O workflow `.github/workflows/deploy-pages.yml` publica uma exportação estática
+da interface em GitHub Pages a partir da branch `main`.
+GitHub Pages não executa Next.js server-side, APIs, NextAuth ou PostgreSQL.
+A versão publicada ali é uma demonstração estática; login, publicação, comentários
+e administração continuam disponíveis com `npm run dev`/`npm run build` em um host
+com suporte a servidor. Para publicação completa, use GitHub Actions para build
+e hospede o runtime em Render, Railway, Fly.io ou outra plataforma compatível.

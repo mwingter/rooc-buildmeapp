@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 import { demoBuilds } from "@/lib/catalog";
 
+export function generateStaticParams() {
+  return demoBuilds.map((build) => ({ id: build.id }));
+}
+
 export default function BuildDetailPage({ params }: { params: { id: string } }) {
   const build = demoBuilds.find((item) => item.id === params.id);
   if (!build) notFound();

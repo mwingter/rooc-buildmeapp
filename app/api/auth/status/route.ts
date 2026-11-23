@@ -1,13 +1,32 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
+  let database: "ok" | "error" = "ok";
+  try {
+    await prisma.user.count();
+  } catch {
+    database = "error";
+  }
+  let nextAuthUrl = null as string | null;
+  try {
+    nextAuthUrl = process.env.NEXTAUTH_URL
+      ? new URL(process.env.NEXTAUTH_URL).host
+      : null;
+  } catch {}
   return NextResponse.json({
     authenticated: !!session?.user,
+    configuration: {
+      discord: !!process.env.DISCORD_CLIENT_ID && !!process.env.DISCORD_CLIENT_SECRET,
+      nextAuthSecret: !!process.env.NEXTAUTH_SECRET,
+      nextAuthUrl,
+      database,
+    },
     user: session?.user
       ? { name: session.user.name, id: (session.user as typeof session.user & { id?: string }).id ?? null }
       : null,

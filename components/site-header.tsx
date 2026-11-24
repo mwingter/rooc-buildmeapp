@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function SiteHeader() {
   const [dark, setDark] = useState(false);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [profileName, setProfileName] = useState("Perfil");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     setDark(localStorage.getItem("theme") === "dark");
     fetch("/api/auth/status", { cache: "no-store" })
@@ -23,6 +25,20 @@ export function SiteHeader() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
+  useEffect(() => {
+    function closeMenu(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) setMenuOpen(false);
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", closeMenu);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeMenu);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
 
   function toggleTheme() {
     const next = !dark;
@@ -46,13 +62,33 @@ export function SiteHeader() {
           <button className="button-secondary px-3" type="button" onClick={toggleTheme} aria-label={dark ? "Ativar tema claro" : "Ativar tema escuro"}>
             {dark ? "☀" : "◐"}
           </button>
-          <Link className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-slate-200 text-sm font-bold dark:bg-slate-800" href="/profile" aria-label={profileName}>
-            {avatar ? (
-              <Image src={avatar} alt="" width={40} height={40} className="h-10 w-10 object-cover" />
-            ) : (
-              <span aria-hidden="true">M</span>
+          <div className="relative" ref={menuRef}>
+            <button
+              className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-slate-200 text-sm font-bold dark:bg-slate-800"
+              type="button"
+              aria-label={`Abrir menu de ${profileName}`}
+              aria-expanded={menuOpen}
+              aria-controls="profile-menu"
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              {avatar ? <Image src={avatar} alt="" width={40} height={40} className="h-10 w-10 object-cover" /> : <span aria-hidden="true">M</span>}
+            </button>
+            {menuOpen && (
+              <div id="profile-menu" className="absolute right-0 top-12 z-50 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                {[
+                  ["/profile", "Perfil"],
+                  ["/friends", "Amigos"],
+                  ["/guild", "Guilda"],
+                  ["/my-builds", "Minhas builds"],
+                  ["/builds", "Explorar builds"],
+                ].map(([href, label]) => (
+                  <Link key={href} href={href} onClick={() => setMenuOpen(false)} className="block rounded-xl px-3 py-2 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800">
+                    {label}
+                  </Link>
+                ))}
+              </div>
             )}
-          </Link>
+          </div>
         </nav>
       </div>
     </header>

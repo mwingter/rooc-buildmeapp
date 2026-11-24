@@ -2,9 +2,74 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum GuildRole {
+  LEADER
+  MEMBER
+}
+
+enum GuildRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Guild {
+  id              String                @id @default(cuid())
+  name            String
+  slug            String                @unique
+  description     String?               @db.Text
+  ownerId         String
+  owner           User                  @relation("guildOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members         GuildMember[]
+  requests        GuildJoinRequest[]
+  recommendations GuildRecommendation[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([ownerId, createdAt])
+}
+
+model GuildMember {
+  guildId   String
+  userId    String
+  role      GuildRole @default(MEMBER)
+  guild     Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@id([guildId, userId])
+  @@index([userId, role])
+}
+
+model GuildJoinRequest {
+  id          String             @id @default(cuid())
+  guildId     String
+  requesterId String
+  status      GuildRequestStatus @default(PENDING)
+  guild       Guild              @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  requester   User               @relation(fields: [requesterId], references: [id], onDelete: Cascade)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@unique([guildId, requesterId])
+  @@index([guildId, status])
+}
+
+model GuildRecommendation {
+  guildId   String
+  buildId   String
+  addedById String
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  build     Build    @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  addedBy   User     @relation(fields: [addedById], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([guildId, buildId])
 }
 
 enum Role {
@@ -55,6 +120,7 @@ model Account {
   id_token          String? @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
 }
 
@@ -70,64 +136,71 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
+
   @@unique([identifier, token])
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  role          Role      @default(USER)
-  gameNick      String?
-  nickVerified  Boolean   @default(false)
-  nickCode      String?
-  nickCodeExpires DateTime?
-  deletedAt     DateTime?
-  accounts      Account[]
-  sessions      Session[]
-  builds        Build[]
-  comments      Comment[]
-  favorites     Favorite[]
-  likes         Like[]
-  sentFriends   Friendship[] @relation("sentFriend")
-  receivedFriends Friendship[] @relation("receivedFriend")
-  reports       Report[] @relation("reports")
-  auditLogs     AuditLog[]
-  notifications Notification[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                   String                @id @default(cuid())
+  name                 String?
+  email                String?               @unique
+  emailVerified        DateTime?
+  image                String?
+  role                 Role                  @default(USER)
+  gameNick             String?
+  nickVerified         Boolean               @default(false)
+  nickCode             String?
+  nickCodeExpires      DateTime?
+  deletedAt            DateTime?
+  accounts             Account[]
+  sessions             Session[]
+  builds               Build[]
+  comments             Comment[]
+  favorites            Favorite[]
+  likes                Like[]
+  sentFriends          Friendship[]          @relation("sentFriend")
+  receivedFriends      Friendship[]          @relation("receivedFriend")
+  reports              Report[]              @relation("reports")
+  auditLogs            AuditLog[]
+  notifications        Notification[]
+  ownedGuilds          Guild[]               @relation("guildOwner")
+  guildMemberships     GuildMember[]
+  guildRequests        GuildJoinRequest[]
+  guildRecommendations GuildRecommendation[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 }
 
 model Build {
-  id            String          @id @default(cuid())
-  authorId      String
-  author        User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  name          String
-  description   String          @db.Text
-  classId       String
-  class         GameClass       @relation(fields: [classId], references: [id])
-  specialization String
-  role          String
-  content       BuildContent[]
-  patchVersion  String
-  visibility    BuildVisibility @default(PUBLIC)
-  official      Boolean         @default(false)
-  attributes    Json
-  skills        Json
-  equipment     Json
-  cards         Json
-  runes         Json
-  astrocore     Json
-  mechanics     Json
-  likes         Like[]
-  favorites     Favorite[]
-  comments      Comment[]
-  reports       Report[]
-  versions      BuildVersion[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id                   String                @id @default(cuid())
+  authorId             String
+  author               User                  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  name                 String
+  description          String                @db.Text
+  classId              String
+  class                GameClass             @relation(fields: [classId], references: [id])
+  specialization       String
+  role                 String
+  content              BuildContent[]
+  patchVersion         String
+  visibility           BuildVisibility       @default(PUBLIC)
+  official             Boolean               @default(false)
+  attributes           Json
+  skills               Json
+  equipment            Json
+  cards                Json
+  runes                Json
+  astrocore            Json
+  mechanics            Json
+  likes                Like[]
+  favorites            Favorite[]
+  comments             Comment[]
+  reports              Report[]
+  versions             BuildVersion[]
+  guildRecommendations GuildRecommendation[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
   @@index([classId, visibility, createdAt])
 }
 
@@ -153,34 +226,38 @@ model Comment {
   hidden    Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
   @@index([buildId, createdAt])
 }
 
 model Like {
   userId  String
   buildId String
-  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  build   Build @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  build   Build  @relation(fields: [buildId], references: [id], onDelete: Cascade)
+
   @@id([userId, buildId])
 }
 
 model Favorite {
   userId  String
   buildId String
-  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  build   Build @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  build   Build  @relation(fields: [buildId], references: [id], onDelete: Cascade)
+
   @@id([userId, buildId])
 }
 
 model Friendship {
-  id         String       @id @default(cuid())
+  id          String       @id @default(cuid())
   requesterId String
   recipientId String
-  status     FriendStatus @default(PENDING)
-  requester  User         @relation("sentFriend", fields: [requesterId], references: [id], onDelete: Cascade)
-  recipient  User         @relation("receivedFriend", fields: [recipientId], references: [id], onDelete: Cascade)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  status      FriendStatus @default(PENDING)
+  requester   User         @relation("sentFriend", fields: [requesterId], references: [id], onDelete: Cascade)
+  recipient   User         @relation("receivedFriend", fields: [recipientId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
   @@unique([requesterId, recipientId])
 }
 
@@ -220,23 +297,24 @@ model AuditLog {
 }
 
 model GameClass {
-  id          String  @id @default(cuid())
-  name        String  @unique
-  slug        String  @unique
+  id              String   @id @default(cuid())
+  name            String   @unique
+  slug            String   @unique
   specializations String[]
-  iconUrl     String?
-  license     String?
-  builds      Build[]
+  iconUrl         String?
+  license         String?
+  builds          Build[]
 }
 
 model CatalogItem {
-  id        String   @id @default(cuid())
-  type      String
-  name      String
-  slug      String
+  id          String  @id @default(cuid())
+  type        String
+  name        String
+  slug        String
   description String? @db.Text
-  iconUrl   String?
-  metadata  Json?
-  license   String?
+  iconUrl     String?
+  metadata    Json?
+  license     String?
+
   @@unique([type, slug])
 }

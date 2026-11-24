@@ -27,10 +27,12 @@ export function PresetEditor({
   onChange,
   skillLevels,
   onSkillLevelsChange,
+  className,
 }: {
   onChange: (value: PresetState) => void;
   skillLevels: Record<string, number>;
   onSkillLevelsChange: (value: Record<string, number>) => void;
+  className: string;
 }) {
   const [active, setActive] = useState("stats");
   const [selected, setSelected] = useState<PresetState>({});
@@ -82,7 +84,7 @@ export function PresetEditor({
           </div>
           {category.id === "skills" ? (
             <div className="mt-4">
-              <SkillTreeEditor value={skillLevels} onChange={onSkillLevelsChange} />
+              <SkillTreeEditor value={skillLevels} onChange={onSkillLevelsChange} className={className} />
             </div>
           ) : (
           <div className="mt-4 grid gap-3 sm:grid-cols-2">

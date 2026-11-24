@@ -65,8 +65,11 @@ export default function CreateBuildPage() {
         {step === 2 && (
           <section className="space-y-5">
             <h2 className="text-xl font-black">2. Atributos e conteúdo</h2>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {(["str", "agi", "vit", "int", "dex", "luk"] as const).map((attribute) => <div key={attribute}><label className="label uppercase" htmlFor={attribute}>{attribute}</label><input className="input" id={attribute} type="number" min="1" max="999" value={form[attribute]} onChange={(e) => set(attribute, Number(e.target.value))} /></div>)}
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/70">
+              <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-sm font-black">Pontos de atributos</p><p className="text-xs text-slate-500">Distribua os pontos entre os seis atributos do personagem.</p></div><span className="rounded-lg bg-violet-100 px-3 py-2 text-sm font-black text-violet-800 dark:bg-violet-950 dark:text-violet-200">{(["str", "agi", "vit", "int", "dex", "luk"] as const).reduce((sum, attribute) => sum + form[attribute], 0)} pontos</span></div>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {(["str", "agi", "vit", "int", "dex", "luk"] as const).map((attribute) => <div key={attribute} className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"><div className="flex items-center justify-between"><label className="text-xs font-black uppercase text-slate-500" htmlFor={attribute}>{attribute}</label><span className="text-lg font-black text-violet-700 dark:text-violet-300">{form[attribute]}</span></div><input className="mt-2 h-1.5 w-full accent-violet-700" id={attribute} type="range" min="1" max="999" value={form[attribute]} onChange={(e) => set(attribute, Number(e.target.value))} /><div className="mt-2 flex items-center justify-between gap-1"><button className="button-secondary px-2 py-1 text-xs" type="button" onClick={() => set(attribute, Math.max(1, form[attribute] - 1))} aria-label={`Diminuir ${attribute}`}>−</button><input className="input h-8 px-2 text-center text-sm" type="number" min="1" max="999" value={form[attribute]} onChange={(e) => set(attribute, Number(e.target.value))} aria-label={`Valor de ${attribute}`} /><button className="button-secondary px-2 py-1 text-xs" type="button" onClick={() => set(attribute, Math.min(999, form[attribute] + 1))} aria-label={`Aumentar ${attribute}`}>+</button></div></div>)}
+              </div>
             </div>
             <fieldset><legend className="label">Conteúdo recomendado</legend><div className="flex flex-wrap gap-2">{["PvE", "PvP", "MVP", "WG"].map((item) => <label key={item} className="rounded-xl border border-slate-300 px-4 py-2 has-[:checked]:border-violet-600 has-[:checked]:bg-violet-50 dark:border-slate-700 dark:has-[:checked]:bg-violet-950"><input className="mr-2" type="checkbox" checked={form.content.includes(item)} onChange={(e) => set("content", e.target.checked ? [...form.content, item] : form.content.filter((value) => value !== item))} />{item}</label>)}</div></fieldset>
           </section>
@@ -77,7 +80,7 @@ export default function CreateBuildPage() {
               <h2 className="text-xl font-black">3. Preset detalhado</h2>
               <p className="mt-1 text-sm text-slate-500">Clique em uma categoria e escolha a configuração. O catálogo real poderá ser expandido pela administração.</p>
             </div>
-            <PresetEditor onChange={setPreset} skillLevels={skillLevels} onSkillLevelsChange={setSkillLevels} />
+            <PresetEditor onChange={setPreset} skillLevels={skillLevels} onSkillLevelsChange={setSkillLevels} className={form.className} />
           </section>
         )}
         {step === 4 && (

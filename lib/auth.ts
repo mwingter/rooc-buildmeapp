@@ -13,6 +13,13 @@ export const authOptions: NextAuthOptions = {
           DiscordProvider({
             clientId: process.env.DISCORD_CLIENT_ID,
             clientSecret: process.env.DISCORD_CLIENT_SECRET,
+            authorization: {
+              url: "https://discord.com/oauth2/authorize",
+              params: { scope: "identify email" },
+            },
+            token: "https://discord.com/api/oauth2/token",
+            userinfo: "https://discord.com/api/users/@me",
+            issuer: "https://discord.com",
           }),
         ]
       : []),

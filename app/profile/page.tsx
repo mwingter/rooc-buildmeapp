@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NickVerification } from "@/components/nick-verification";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +25,13 @@ export default async function ProfilePage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <section className="card p-6">
         <div className="flex items-center gap-4">
-          <div className="grid h-16 w-16 place-items-center rounded-full bg-violet-700 text-xl font-black text-white">
-            {(user.gameNick ?? user.name ?? "J").slice(0, 1).toUpperCase()}
-          </div>
+          {user.image ? (
+            <Image src={user.image} alt={`Foto de perfil de ${user.name ?? "usuário"}`} width={64} height={64} className="h-16 w-16 rounded-full object-cover" />
+          ) : (
+            <div className="grid h-16 w-16 place-items-center rounded-full bg-violet-700 text-xl font-black text-white">
+              {(user.gameNick ?? user.name ?? "J").slice(0, 1).toUpperCase()}
+            </div>
+          )}
           <div>
             <h1 className="text-2xl font-black">{user.name ?? "Jogador"}</h1>
             <p className="text-sm text-slate-500">{user.gameNick ? `Personagem: ${user.gameNick}` : "Nenhum personagem associado"}</p>

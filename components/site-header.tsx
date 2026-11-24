@@ -1,12 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export function SiteHeader() {
   const [dark, setDark] = useState(false);
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [profileName, setProfileName] = useState("Perfil");
   useEffect(() => {
     setDark(localStorage.getItem("theme") === "dark");
+    fetch("/api/auth/status", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((status: { authenticated?: boolean; user?: { name?: string | null; image?: string | null } } | null) => {
+        if (status?.authenticated) {
+          setAvatar(status.user?.image ?? null);
+          setProfileName(status.user?.name ?? "Perfil");
+        }
+      })
+      .catch(() => {});
   }, []);
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -33,8 +45,12 @@ export function SiteHeader() {
           <button className="button-secondary px-3" type="button" onClick={toggleTheme} aria-label={dark ? "Ativar tema claro" : "Ativar tema escuro"}>
             {dark ? "☀" : "◐"}
           </button>
-          <Link className="grid h-10 w-10 place-items-center rounded-full bg-slate-200 text-sm font-bold dark:bg-slate-800" href="/profile" aria-label="Perfil">
-            M
+          <Link className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-slate-200 text-sm font-bold dark:bg-slate-800" href="/profile" aria-label={profileName}>
+            {avatar ? (
+              <Image src={avatar} alt="" width={40} height={40} className="h-10 w-10 object-cover" />
+            ) : (
+              <span aria-hidden="true">M</span>
+            )}
           </Link>
         </nav>
       </div>

@@ -37,7 +37,11 @@ export async function GET() {
       callbackUrl: "https://rooc-buildmeapp.vercel.app/api/auth/callback/discord",
     },
     user: session?.user
-      ? { name: session.user.name, id: (session.user as typeof session.user & { id?: string }).id ?? null }
+      ? {
+          name: session.user.name,
+          image: session.user.image ?? null,
+          id: (session.user as typeof session.user & { id?: string }).id ?? null,
+        }
       : null,
   });
 }

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { FriendActions } from "@/components/friend-actions";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +48,11 @@ export default async function FriendsPage() {
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {friends.map((friend) => (
                 <article key={friend.id} className="flex items-center gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-800">
-                  <div className="grid h-11 w-11 place-items-center rounded-full bg-violet-700 text-sm font-black text-white">{(friend.gameNick ?? friend.name ?? "J").slice(0, 1).toUpperCase()}</div>
+                  {friend.image ? (
+                    <Image src={friend.image} alt={`Foto de perfil de ${friend.gameNick ?? friend.name ?? "usuário"}`} width={44} height={44} className="h-11 w-11 rounded-full object-cover" />
+                  ) : (
+                    <div className="grid h-11 w-11 place-items-center rounded-full bg-violet-700 text-sm font-black text-white">{(friend.gameNick ?? friend.name ?? "J").slice(0, 1).toUpperCase()}</div>
+                  )}
                   <div className="min-w-0"><p className="truncate font-bold">{friend.gameNick ?? friend.name ?? "Jogador"}</p><p className="text-xs text-slate-500">Builds privadas entre amigos habilitadas</p></div>
                 </article>
               ))}

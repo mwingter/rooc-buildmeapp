@@ -39,7 +39,8 @@ export function SiteHeader() {
         </Link>
         <nav className="ml-auto flex items-center gap-1" aria-label="Navegação principal">
           <Link className="button-secondary hidden sm:inline-flex" href="/builds">Explorar</Link>
-          <Link className="button-secondary hidden lg:inline-flex" href="/friends">Amigos</Link>
+          <Link className="button-secondary hidden md:inline-flex" href="/friends">Amigos</Link>
+          <Link className="button-primary hidden sm:inline-flex" href="/friends#search">Adicionar amigos</Link>
           <Link className="button-secondary hidden lg:inline-flex" href="/guild">Guilda</Link>
           <Link className="button-primary" href="/builds/create">Nova build</Link>
           <button className="button-secondary px-3" type="button" onClick={toggleTheme} aria-label={dark ? "Ativar tema claro" : "Ativar tema escuro"}>

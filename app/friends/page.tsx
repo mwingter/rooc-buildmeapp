@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { FriendActions } from "@/components/friend-actions";
 import Image from "next/image";
+import { FriendSearch } from "@/components/friend-search";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,7 @@ export default async function FriendsPage() {
         <p className="text-sm font-bold text-violet-700 dark:text-violet-300">Rede social</p>
         <h1 className="text-3xl font-black">Amigos</h1>
       </div>
+      <FriendSearch />
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <section className="card p-5">
           <h2 className="text-xl font-black">Amigos ({friends.length})</h2>

@@ -4,33 +4,33 @@ import { useState } from "react";
 
 export function NickVerification({ initialNick }: { initialNick: string }) {
   const [nick, setNick] = useState(initialNick);
-  const [code, setCode] = useState("");
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
-  async function generateCode() {
+  async function saveNick() {
     setError("");
-    setCode("");
+    setSaved(false);
     const response = await fetch("/api/profile/nick", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nick }),
     });
     if (!response.ok) {
-      setError("Não foi possível gerar o código.");
+      setError("Não foi possível associar o nick.");
       return;
     }
-    setCode(await response.text());
+    setSaved(true);
   }
 
   return (
     <section className="card p-6">
-      <h2 className="text-xl font-black">Verificar nick do jogo</h2>
-      <p className="mt-1 text-sm text-slate-500">Nenhuma senha da conta do jogo é necessária.</p>
+      <h2 className="text-xl font-black">Nick do Ragnarok Origin</h2>
+      <p className="mt-1 text-sm text-slate-500">Informe o personagem que você usa. Não é necessária senha ou verificação da conta.</p>
       <div className="mt-5 flex flex-col gap-3 sm:flex-row">
         <input className="input" value={nick} onChange={(event) => setNick(event.target.value)} placeholder="Nick no Ragnarok Origin" aria-label="Nick no Ragnarok Origin" />
-        <button className="button-primary" type="button" onClick={generateCode}>Gerar código</button>
+        <button className="button-primary" type="button" onClick={saveNick}>Salvar nick</button>
       </div>
-      {code && <div className="mt-4 rounded-xl border border-dashed border-violet-400 bg-violet-50 p-4 dark:bg-violet-950"><p className="text-sm">Exiba este código temporariamente no campo público correspondente do perfil do jogo:</p><p className="mt-2 text-2xl font-black tracking-widest">{code}</p></div>}
+      {saved && <p role="status" className="mt-3 rounded-xl bg-emerald-100 p-3 text-sm font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Nick associado ao perfil.</p>}
       {error && <p role="alert" className="mt-3 text-sm font-bold text-red-700">{error}</p>}
     </section>
   );

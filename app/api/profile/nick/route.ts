@@ -10,10 +10,14 @@ export async function POST(request: NextRequest) {
   if (typeof nick !== "string" || nick.trim().length < 3 || nick.trim().length > 30) {
     return NextResponse.json({ error: "Nick inválido" }, { status: 400 });
   }
-  const code = `ROOC-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { gameNick: nick.trim(), nickVerified: false, nickCode: code, nickCodeExpires: new Date(Date.now() + 15 * 60_000) },
+    data: {
+      gameNick: nick.trim(),
+      nickVerified: false,
+      nickCode: null,
+      nickCodeExpires: null,
+    },
   });
-  return new NextResponse(code);
+  return NextResponse.json({ nick: nick.trim(), saved: true });
 }

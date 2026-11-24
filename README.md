@@ -9,7 +9,7 @@ O projeto usa Next.js App Router, TypeScript, Tailwind CSS, Prisma, PostgreSQL e
 - Catálogo público de builds, filtros por classe, conteúdo e criador.
 - Páginas detalhadas com atributos, skills, equipamentos e cartas.
 - Editor de build em etapas com preview antes da publicação.
-- Perfis com nick do jogo e fluxo de verificação por código temporário.
+- Perfis com associação direta do nick do personagem no jogo.
 - Discord OAuth2 real em produção e provedor mock local.
 - APIs tipadas com Zod para builds, comentários, amizade, perfil e administração.
 - Privacidade por build (`PUBLIC`, `PRIVATE`, `FRIENDS`, `GUILD`).

@@ -29,7 +29,7 @@ export default async function ProfilePage() {
           </div>
           <div>
             <h1 className="text-2xl font-black">{user.name ?? "Jogador"}</h1>
-            <p className="text-sm text-slate-500">{user.nickVerified ? `Nick verificado: ${user.gameNick}` : "Nick ainda não verificado"}</p>
+            <p className="text-sm text-slate-500">{user.gameNick ? `Personagem: ${user.gameNick}` : "Nenhum personagem associado"}</p>
           </div>
         </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
